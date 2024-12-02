@@ -24,25 +24,28 @@ public class Main {
             po36.addMenuItem(item);
         }
 
+        // Список ресторанів
+        List<Restaurant> restaurants = List.of(amadeus, celentano, po36);
+
         // Вибір ресторану
         System.out.println("Оберіть ресторан: Amadeus/Celentano/36 Po:");
         String restaurantChoice = scanner.nextLine().trim();
 
-        Restaurant selectedRestaurant;
+        // Перевірка наявності ресторану
+        try {
+            Restaurant.checkRestaurantExists(restaurantChoice, restaurants);
+        } catch (RestaurantException e) {
+            System.out.println("Помилка: " + e.getMessage());
+            return;
+        }
 
-        switch (restaurantChoice) {
-            case "Amadeus":
-                selectedRestaurant = amadeus;
+        // Призначення вибраного ресторану
+        Restaurant selectedRestaurant = null;
+        for (Restaurant restaurant : restaurants) {
+            if (restaurant.getName().equalsIgnoreCase(restaurantChoice)) {
+                selectedRestaurant = restaurant;
                 break;
-            case "Celentano":
-                selectedRestaurant = celentano;
-                break;
-            case "36 Po":
-                selectedRestaurant = po36;
-                break;
-            default:
-                System.out.println("Такого ресторану не існує.");
-                return;
+            }
         }
 
         // Починаємо замовлення
@@ -57,8 +60,11 @@ public class Main {
                 break;
             }
 
-            if (!categories.contains(selectedCategory)) {
-                System.out.println("Такої категорії не існує.");
+            // Перевірка наявності категорії
+            try {
+                selectedRestaurant.checkMenuExists(selectedCategory);
+            } catch (RestaurantException e) {
+                System.out.println("Помилка: " + e.getMessage());
                 continue;
             }
 
@@ -79,7 +85,7 @@ public class Main {
             }
 
             boolean found = false;
-            for (MenuItem item : itemsInCategory) {
+            for (FoodItem item : itemsInCategory) {
                 if (item.getName().equalsIgnoreCase(selectedItemName)) {
                     totalSum += item.getPrice();
                     System.out.println("Додано до замовлення: " + item.getName() + " - " + item.getPrice() + " ₴");
